@@ -1,12 +1,15 @@
-FROM mariadb:10.11
+FROM rockylinux:9
 
-# 환경 변수 설정
-ENV MARIADB_ROOT_PASSWORD=rootpassword
-ENV MARIADB_DATABASE=secondhand_db
-ENV MARIADB_USER=service_user
-ENV MARIADB_PASSWORD=servicepassword
+# PostgreSQL 15 서버 및 모듈 설치
+RUN dnf install -y postgresql-server postgresql-contrib && \
+    dnf clean all
 
-# 최초 기동 시 자동 실행될 SQL 스크립트 복사
-COPY init.sql /docker-entrypoint-initdb.d/
+# 초기화 스크립트 및 SQL 복사
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY init.sql /docker-entrypoint-initdb.d/init.sql
 
-EXPOSE 3306
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 5432
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

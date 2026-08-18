@@ -1,22 +1,28 @@
-CREATE DATABASE IF NOT EXISTS secondhand_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE secondhand_db;
-
--- 회원 테이블
+-- 테이블 생성
 CREATE TABLE IF NOT EXISTS users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     nickname VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 상품 테이블
 CREATE TABLE IF NOT EXISTS products (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     seller_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     price INT NOT NULL,
-    status ENUM('ON_SALE', 'RESERVED', 'SOLD_OUT') DEFAULT 'ON_SALE',
+    status VARCHAR(20) DEFAULT 'ON_SALE' CHECK (status IN ('ON_SALE', 'RESERVED', 'SOLD_OUT')),
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id BIGSERIAL PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    buyer_id BIGINT NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELED')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    FOREIGN KEY (buyer_id) REFERENCES users(id)
 );
